@@ -34,7 +34,6 @@ router.post("/", (req, res) => {
   const uid = uuidv4();
 
   users.push({ ...user, id: uid });
-  console.log("[post]");
   res.send(`${user.first_name} has been added to the Database with ID: ${uid}`);
 });
 
@@ -53,6 +52,22 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     res.status(404).send({ error: error.message });
   }
+});
+
+router.put('/:id', (req, res) => {
+  const { id } = req.params;
+
+  const { first_name, last_name, age, email} = req.body;
+
+  const user = users.find((user) => user.id === id)
+
+  if(first_name) user.first_name = first_name;
+  if(last_name) user.last_name = last_name;
+  if(age) user.age = age;
+  if(email) user.email = email;
+
+  res.send(`User with the ${id} has been updated`)
+  
 });
 
 export default router;
