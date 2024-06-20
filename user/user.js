@@ -13,6 +13,14 @@ router.get("/", (req, res) => {
   }
 });
 
+router.post("/", (req, res) => {
+  var user = req.body;
+  const uid = uuidv4();
+
+  users.push({ ...user, id: uid });
+  res.send(`${user.first_name} has been added to the Database with ID: ${uid}`);
+});
+
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -29,21 +37,13 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.post("/", (req, res) => {
-  var user = req.body;
-  const uid = uuidv4();
-
-  users.push({ ...user, id: uid });
-  res.send(`${user.first_name} has been added to the Database with ID: ${uid}`);
-});
-
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const index = users.findIndex((user) => user.id === id);
+    const index = users.find((user) => user.id === id);
 
-    if (index === -1) {
+    if (index === undefined) {
       throw new Error(`ID: ${id} can not find in database`);
     }
 
@@ -54,20 +54,26 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-router.put('/:id', (req, res) => {
+router.put("/:id", (req, res) => {
   const { id } = req.params;
+  const { first_name, last_name, age, email } = req.body;
 
-  const { first_name, last_name, age, email} = req.body;
+  try {
+    const user = users.find((user) => user.id === id);
 
-  const user = users.find((user) => user.id === id)
+    if (user === undefined) {
+      throw new Error(`ID: ${id} can not find in database`);
+    } else {
+      if (first_name) user.first_name = first_name;
+      if (last_name) user.last_name = last_name;
+      if (age) user.age = age;
+      if (email) user.email = email;
 
-  if(first_name) user.first_name = first_name;
-  if(last_name) user.last_name = last_name;
-  if(age) user.age = age;
-  if(email) user.email = email;
-
-  res.send(`User with the ${id} has been updated`)
-  
+      res.send(`User with the ${id} has been updated`);
+    }
+  } catch (error) {
+    res.status(404).send({ error: error.message });
+  }
 });
 
 export default router;
